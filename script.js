@@ -89,11 +89,80 @@ class StorageManager {
     }
 }
 
+// --- Audio Controller ---
+class AudioController {
+    constructor() {
+        this.audioContext = null;
+        this.initialized = false;
+    }
+
+    init() {
+        if (!this.initialized) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+            this.initialized = true;
+        } else if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    }
+
+    playTone(frequency, duration, type = 'sine') {
+        if (!this.audioContext) return;
+
+        const osc = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+
+        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+
+        osc.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        osc.start();
+        osc.stop(this.audioContext.currentTime + duration);
+    }
+
+    playStepChange() {
+        // Short high beep for step change
+        this.playTone(880, 0.1, 'sine');
+    }
+
+    playComplete() {
+        // Melodic sequence for completion
+        if (!this.audioContext) return;
+
+        const now = this.audioContext.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+
+        notes.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.15);
+
+            gainNode.gain.setValueAtTime(0.1, now + i * 0.15);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
+
+            osc.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+
+            osc.start(now + i * 0.15);
+            osc.stop(now + i * 0.15 + 0.3);
+        });
+    }
+}
+
+
 // --- Timer Engine ---
 class IntervalTimer {
-    constructor(onTick, onComplete) {
+    constructor(onTick, onComplete, onStepChange) {
         this.onTick = onTick;
         this.onComplete = onComplete;
+        this.onStepChange = onStepChange;
         this.schedule = [];
         this.currentIndex = 0;
         this.remainingInStep = 0; // ms
@@ -192,6 +261,7 @@ class IntervalTimer {
                 return;
             }
             this.startStep(this.schedule[this.currentIndex]);
+            if (this.onStepChange) this.onStepChange(this.schedule[this.currentIndex]);
         }
 
         if (this.onTick) {
@@ -253,11 +323,13 @@ class UIController {
         this.toggleBtn = document.getElementById('toggle-btn');
         this.resetBtn = document.getElementById('reset-btn');
 
-        // Audio (Optional, but good for UX - not requested but good practice to have placeholder)
+        // Audio
+        this.audio = new AudioController();
 
         this.timer = new IntervalTimer(
             (state) => this.updateTimerDisplay(state),
-            () => this.onTimerComplete()
+            () => this.onTimerComplete(),
+            (step) => this.onStepChange(step)
         );
 
         this.init();
@@ -315,6 +387,9 @@ class UIController {
                 this.updateToggleBtn('pause');
             } else {
                 // Start fresh
+                // Ensure audio context is active on user gesture
+                this.audio.init();
+
                 const preset = state.presets.find(p => p.id === state.currentPresetId);
                 this.timer.start(preset);
                 this.updateToggleBtn('pause');
@@ -519,10 +594,15 @@ class UIController {
     }
 
     onTimerComplete() {
+        this.audio.playComplete();
         this.updateToggleBtn('start');
         this.stepNameDisplay.textContent = "DONE";
         this.timerDisplay.textContent = "0:00";
         this.progressCircle.style.strokeDashoffset = 0; // Full
+    }
+
+    onStepChange(step) {
+        this.audio.playStepChange();
     }
 
     updateToggleBtn(state) {

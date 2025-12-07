@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interval Timer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Settings View -->
+        <div id="settings-view" class="view active">
+            <header>
+                <h1>Interval Timer</h1>
+                <button id="add-preset-btn" class="icon-btn" aria-label="Add Preset">+</button>
+            </header>
+            <div id="preset-list" class="preset-list">
+                <!-- Presets will be injected here -->
+            </div>
+            
+            <!-- Modal for Editing/Creating Preset -->
+            <dialog id="preset-editor-modal">
+                <form id="preset-form">
+                    <h2>Edit Preset</h2>
+                    <div class="form-group">
+                        <label for="preset-name">Name</label>
+                        <input type="text" id="preset-name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sets (Work / Rest)</label>
+                        <div id="sets-container">
+                            <!-- Dynamic set inputs -->
+                        </div>
+                        <button type="button" id="add-set-btn" class="secondary-btn">+ Add Set</button>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="preset-repetitions">Repetitions</label>
+                            <input type="number" id="preset-repetitions" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="preset-break">Long Break (sec)</label>
+                            <input type="number" id="preset-break" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-edit-btn" class="secondary-btn">Cancel</button>
+                        <button type="submit" class="primary-btn">Save</button>
+                    </div>
+                </form>
+            </dialog>
+        </div>
+
+        <!-- Timer View -->
+        <div id="timer-view" class="view hidden">
+            <header>
+                <button id="back-btn" class="icon-btn" aria-label="Back">←</button>
+                <h2 id="timer-preset-name">Preset Name</h2>
+            </header>
+            
+            <div class="timer-display">
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" width="300" height="300">
+                        <circle class="progress-ring__circle-bg" stroke="var(--bg-secondary)" stroke-width="12" fill="transparent" r="140" cx="150" cy="150"/>
+                        <circle class="progress-ring__circle" stroke="var(--primary-color)" stroke-width="12" fill="transparent" r="140" cx="150" cy="150"/>
+                    </svg>
+                    <div class="timer-info">
+                        <div id="step-name" class="step-name">Work</div>
+                        <div id="time-display" class="time-display">00:00</div>
+                        <div id="rep-display" class="rep-display">Set 1/8</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="reset-btn" class="control-btn secondary" aria-label="Reset">
+                    <span class="icon">↺</span>
+                </button>
+                <button id="toggle-btn" class="control-btn primary" aria-label="Start">
+                    <span class="icon">▶</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

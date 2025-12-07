@@ -550,3 +550,8 @@ class UIController {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new UIController();
 });
+
+// --- Export for Testing ---
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { IntervalTimer, StorageManager, state };
+}

@@ -372,7 +372,7 @@ class UIController {
 
         // Back Button
         document.getElementById('back-btn').addEventListener('click', () => {
-            this.timer.pause(); // Pause when leaving
+            this.timer.reset(); // Reset when leaving
             this.updateToggleBtn('start');
             this.switchView('settings-view');
         });

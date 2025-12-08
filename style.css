@@ -306,6 +306,7 @@ input:focus {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
+    align-items: center;
 }
 
 .set-row select {
@@ -332,4 +333,24 @@ input:focus {
     justify-content: flex-end;
     gap: var(--spacing-md);
     margin-top: var(--spacing-lg);
+}
+
+.duration-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.duration-input-group input {
+    flex: 1;
+    width: 100%; /* Ensure input takes up space */
+}
+
+.duration-input-group select {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px; /* Match input padding */
+    height: 40px; /* Match input height */
 }

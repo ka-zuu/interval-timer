@@ -44,8 +44,14 @@
                             <input type="number" id="preset-repetitions" min="1" value="1" required>
                         </div>
                         <div class="form-group">
-                            <label for="preset-break">Long Break (sec)</label>
-                            <input type="number" id="preset-break" min="0" value="0">
+                            <label for="preset-break">Long Break</label>
+                            <div class="duration-input-group">
+                                <input type="number" id="preset-break" min="0" value="0">
+                                <select id="preset-break-unit">
+                                    <option value="sec">Sec</option>
+                                    <option value="min">Min</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

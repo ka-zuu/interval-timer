@@ -468,15 +468,25 @@ class UIController {
         this.editingId = presetId;
         this.setsContainer.innerHTML = '';
 
+        document.getElementById('preset-form').reset();
+        document.getElementById('preset-break-unit').value = 'sec';
+
         if (presetId) {
             const preset = state.presets.find(p => p.id === presetId);
             document.getElementById('preset-name').value = preset.name;
             document.getElementById('preset-repetitions').value = preset.repetitions;
-            document.getElementById('preset-break').value = preset.break_duration;
+
+            const breakDuration = preset.break_duration;
+            if (breakDuration > 0 && breakDuration % 60 === 0) {
+                document.getElementById('preset-break').value = breakDuration / 60;
+                document.getElementById('preset-break-unit').value = 'min';
+            } else {
+                document.getElementById('preset-break').value = breakDuration;
+                document.getElementById('preset-break-unit').value = 'sec';
+            }
 
             preset.sets.forEach(set => this.addSetInput(set));
         } else {
-            document.getElementById('preset-form').reset();
             this.addSetInput({ type: 'work', duration: 20 });
             this.addSetInput({ type: 'rest', duration: 10 });
         }
@@ -487,12 +497,26 @@ class UIController {
     addSetInput(set = { type: 'work', duration: 30 }) {
         const div = document.createElement('div');
         div.className = 'set-row';
+
+        let duration = set.duration;
+        let unit = 'sec';
+        if (duration > 0 && duration % 60 === 0) {
+            duration = duration / 60;
+            unit = 'min';
+        }
+
         div.innerHTML = `
             <select class="set-type">
                 <option value="work" ${set.type === 'work' ? 'selected' : ''}>Work</option>
                 <option value="rest" ${set.type === 'rest' ? 'selected' : ''}>Rest</option>
             </select>
-            <input type="number" class="set-duration" value="${set.duration}" min="1" required>
+            <div class="duration-input-group">
+                <input type="number" class="set-duration" value="${duration}" min="1" required>
+                <select class="set-duration-unit">
+                    <option value="sec" ${unit === 'sec' ? 'selected' : ''}>Sec</option>
+                    <option value="min" ${unit === 'min' ? 'selected' : ''}>Min</option>
+                </select>
+            </div>
             <button type="button" class="remove-set-btn">×</button>
         `;
 
@@ -506,13 +530,20 @@ class UIController {
     saveForm() {
         const name = document.getElementById('preset-name').value;
         const repetitions = parseInt(document.getElementById('preset-repetitions').value, 10);
-        const breakDuration = parseInt(document.getElementById('preset-break').value, 10);
+
+        const breakDurationRaw = parseInt(document.getElementById('preset-break').value, 10);
+        const breakUnit = document.getElementById('preset-break-unit').value;
+        const breakDuration = breakUnit === 'min' ? breakDurationRaw * 60 : breakDurationRaw;
 
         const sets = [];
         this.setsContainer.querySelectorAll('.set-row').forEach(row => {
+            const durationRaw = parseInt(row.querySelector('.set-duration').value, 10);
+            const unit = row.querySelector('.set-duration-unit').value;
+            const duration = unit === 'min' ? durationRaw * 60 : durationRaw;
+
             sets.push({
                 type: row.querySelector('.set-type').value,
-                duration: parseInt(row.querySelector('.set-duration').value, 10)
+                duration: duration
             });
         });
 

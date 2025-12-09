@@ -126,12 +126,41 @@ class AudioController {
     }
 
     playStepChange() {
-        // Short high beep for step change
-        this.playTone(880, 0.1, 'sine');
+        // ステップ切り替え時の通知音（ピピピッ、ピピピッ）
+        if (!this.audioContext) return;
+        const now = this.audioContext.currentTime;
+        const freq = 880;
+        const beepDuration = 0.08;
+        const beepInterval = 0.12;
+        const groupPause = 0.25;
+
+        const playBeep = (startTime) => {
+            const osc = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            gainNode.gain.setValueAtTime(0.1, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + beepDuration);
+            osc.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            osc.start(startTime);
+            osc.stop(startTime + beepDuration);
+        };
+
+        // 1回目の「ピピピッ」
+        playBeep(now);
+        playBeep(now + beepInterval);
+        playBeep(now + beepInterval * 2);
+
+        // 2回目の「ピピピッ」
+        const secondGroupStartTime = now + beepInterval * 2 + groupPause;
+        playBeep(secondGroupStartTime);
+        playBeep(secondGroupStartTime + beepInterval);
+        playBeep(secondGroupStartTime + beepInterval * 2);
     }
 
     playComplete() {
-        // Melodic sequence for completion
+        // タイマー完了時のメロディ
         if (!this.audioContext) return;
 
         const now = this.audioContext.currentTime;

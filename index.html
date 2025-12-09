@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon" href="favicon.svg">
 </head>
 <body>
     <div id="app">
@@ -96,5 +99,17 @@
         </div>
     </div>
     <script src="script.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js')
+            .then((registration) => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, (err) => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
 </body>
 </html>

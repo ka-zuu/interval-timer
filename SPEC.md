@@ -26,6 +26,9 @@ HIIT (High Intensity Interval Training) やポモドーロテクニックなど�
     *   **Start/Resume**: タイマーの開始または再開。
     *   **Pause**: タイマーの一時停止。
     *   **Reset**: タイマーを初期状態に戻し、進行状況をリセット。
+*   **音声通知**:
+    *   ステップ（Work/Restなど）が切り替わるタイミングで通知音を再生。
+    *   タイマー完了時に完了音を再生。
 
 ### 3.2 設定管理機能 (プリセット)
 *   **保存**: 複数のタイマー設定を `localStorage` に保存。
@@ -97,9 +100,14 @@ SPA (Single Page Application) 風の画面遷移を採用。
 ### 6.2 `IntervalTimer`
 *   純粋なタイマーロジックを担当（UI非依存）。
 *   スケジュール（実行キュー）の構築と実行管理。
-*   `tick` メソッドで時間を更新し、コールバック (`onTick`, `onComplete`) を通じて状態を通知。
+*   `tick` メソッドで時間を更新し、コールバック (`onTick`, `onComplete`, `onStepChange`) を通じて状態を通知。
 
-### 6.3 `UIController`
+### 6.3 `AudioController`
+*   `Web Audio API` を利用した音声再生をカプセル化。
+*   ユーザー操作があるまで `AudioContext` の初期化を遅延。
+*   メソッド: `init`, `playStepChange`, `playComplete`。
+
+### 6.4 `UIController`
 *   DOM操作とイベントリスナーの管理。
 *   `IntervalTimer` のインスタンスを持ち、UIとロジックを橋渡しする。
 *   画面遷移 (`switchView`) の制御。

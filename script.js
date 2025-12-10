@@ -689,7 +689,57 @@ class UIController {
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new UIController();
+    registerServiceWorker();
 });
+
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then((registration) => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+                // Check for updates
+                if (registration.waiting) {
+                    showUpdateNotification(registration.waiting);
+                }
+
+                registration.onupdatefound = () => {
+                    const newWorker = registration.installing;
+                    newWorker.onstatechange = () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showUpdateNotification(newWorker);
+                        }
+                    };
+                };
+            }, (err) => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+    });
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+        }
+    });
+}
+
+function showUpdateNotification(worker) {
+    const notification = document.getElementById('update-notification');
+    const updateBtn = document.getElementById('update-btn');
+
+    if (notification && updateBtn) {
+        notification.classList.remove('hidden');
+
+        updateBtn.addEventListener('click', () => {
+            worker.postMessage({ type: 'SKIP_WAITING' });
+            notification.classList.add('hidden');
+        });
+    }
+}
 
 // --- Export for Testing ---
 if (typeof module !== 'undefined' && module.exports) {

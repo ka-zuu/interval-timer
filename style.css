@@ -378,3 +378,33 @@ input:focus {
     padding: 10px; /* Match input padding */
     height: 40px; /* Match input height */
 }
+
+/* Update Notification */
+.update-notification {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--primary-color);
+    padding: 16px;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 100;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.update-notification.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 20px);
+}
+
+.small-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}

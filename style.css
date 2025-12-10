@@ -267,6 +267,12 @@ dialog {
     margin: auto;
 }
 
+@media (max-width: 480px) {
+    dialog {
+        padding: var(--spacing-md); /* Reduce padding on mobile */
+    }
+}
+
 dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.7);
 }
@@ -309,6 +315,12 @@ input:focus {
     align-items: center;
 }
 
+@media (max-width: 480px) {
+    .set-row {
+        gap: 4px; /* Reduce gap on mobile */
+    }
+}
+
 .set-row select {
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -316,6 +328,7 @@ input:focus {
     border-radius: 8px;
     padding: 8px;
     flex: 1;
+    min-width: 70px; /* Ensure text is visible */
 }
 
 .set-row input {
@@ -339,11 +352,20 @@ input:focus {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex: 2; /* Take more space than the type select */
+    min-width: 0;
+}
+
+@media (max-width: 480px) {
+    .duration-input-group {
+        gap: 4px; /* Reduce gap on mobile */
+    }
 }
 
 .duration-input-group input {
     flex: 1;
     width: 100%; /* Ensure input takes up space */
+    min-width: 0; /* Allow shrinking */
 }
 
 .duration-input-group select {

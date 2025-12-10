@@ -362,6 +362,19 @@ input:focus {
     .duration-input-group {
         gap: 4px; /* Reduce gap on mobile */
     }
+
+    .form-row {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .modal-actions {
+        justify-content: space-between;
+    }
+
+    .modal-actions button {
+        flex: 1;
+    }
 }
 
 .duration-input-group input {

@@ -82,4 +82,71 @@ test.describe('Interval Timer App', () => {
 
         await expect(page.locator('.preset-card')).toHaveCount(1);
     });
+
+    test('should edit an existing preset', async ({ page }) => {
+        // Edit first preset
+        await page.locator('.preset-card').first().locator('.edit-btn').click();
+        await expect(page.locator('#preset-editor-modal')).toBeVisible();
+
+        // Change name and reps
+        await page.fill('#preset-name', 'Edited HIIT');
+        await page.fill('#preset-repetitions', '10');
+
+        // Add a new set
+        await page.locator('#add-set-btn').click();
+        // Check new set row exists (3 sets total now)
+        await expect(page.locator('.set-row')).toHaveCount(3);
+
+        // Save
+        await page.locator('button[type="submit"]').click();
+
+        // Verify changes in list
+        const card = page.locator('.preset-card').first();
+        await expect(card).toContainText('Edited HIIT');
+        await expect(card).toContainText('3 steps x 10 reps');
+    });
+
+    test('should remove a set in editor', async ({ page }) => {
+         await page.locator('#add-preset-btn').click();
+
+         // Starts with 2 default sets
+         await expect(page.locator('.set-row')).toHaveCount(2);
+
+         // Remove one
+         await page.locator('.remove-set-btn').first().click();
+         await expect(page.locator('.set-row')).toHaveCount(1);
+
+         // Try to save with name
+         await page.fill('#preset-name', 'One Set Timer');
+         await page.locator('button[type="submit"]').click();
+
+         // Should be visible
+         await expect(page.locator('.preset-card').last()).toContainText('One Set Timer');
+    });
+
+    test('should validate empty sets', async ({ page }) => {
+        await page.locator('#add-preset-btn').click();
+
+        // Ensure name is filled (required field)
+        await page.fill('#preset-name', 'Empty Sets Timer');
+
+        // Remove all sets
+        const removeButtons = page.locator('.remove-set-btn');
+        const count = await removeButtons.count();
+        for (let i = 0; i < count; i++) {
+            await page.locator('.remove-set-btn').first().click();
+        }
+
+        // Setup listener and trigger click
+        const [dialog] = await Promise.all([
+            page.waitForEvent('dialog'),
+            page.locator('button[type="submit"]').click()
+        ]);
+
+        expect(dialog.message()).toBe('Please add at least one set.');
+        await dialog.dismiss();
+
+        // Modal should still be open
+        await expect(page.locator('#preset-editor-modal')).toBeVisible();
+    });
 });

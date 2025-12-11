@@ -29,6 +29,8 @@ HIIT (High Intensity Interval Training) やポモドーロテクニックなど�
 *   **音声通知**:
     *   ステップ（Work/Restなど）が切り替わるタイミングで通知音を再生。
     *   タイマー完了時に完了音を再生。
+*   **画面制御**:
+    *   **Wake Lock**: タイマー実行中 (Running) は、Screen Wake Lock API を使用して画面が自動で消灯（スリープ）しないように制御。
 
 ### 3.2 設定管理機能 (プリセット)
 *   **保存**: 複数のタイマー設定を `localStorage` に保存。
@@ -108,7 +110,13 @@ SPA (Single Page Application) 風の画面遷移を採用。
 *   ユーザー操作があるまで `AudioContext` の初期化を遅延。
 *   メソッド: `init`, `playStepChange`, `playComplete`。
 
-### 6.4 `UIController`
+### 6.4 `WakeLockManager`
+*   Screen Wake Lock API のラッパー。
+*   タイマー実行中の画面スリープ防止を管理。
+*   メソッド: `enable`, `disable`, `activate`, `deactivate`。
+*   可視性 (`visibilitychange`) イベントを監視し、タブ復帰時にロックを再取得。
+
+### 6.5 `UIController`
 *   DOM操作とイベントリスナーの管理。
 *   `IntervalTimer` のインスタンスを持ち、UIとロジックを橋渡しする。
 *   画面遷移 (`switchView`) の制御。

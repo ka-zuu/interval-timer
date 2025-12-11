@@ -272,6 +272,7 @@ dialog {
 @media (max-width: 480px) {
     dialog {
         padding: var(--spacing-md); /* Reduce padding on mobile */
+        margin: 20px auto auto auto; /* Position at the top */
     }
 }
 

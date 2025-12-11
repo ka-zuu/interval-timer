@@ -4,7 +4,7 @@
 
 // --- Constants & Types ---
 const STORAGE_KEY = 'TIMER_PRESETS';
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.0.1';
 
 // --- State Management ---
 const state = {
@@ -116,7 +116,7 @@ class AudioController {
         osc.type = type;
         osc.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
 
-        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.5, this.audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
 
         osc.connect(gainNode);
@@ -130,7 +130,7 @@ class AudioController {
         // ステップ切り替え時の通知音（ピピピッ、ピピピッ）
         if (!this.audioContext) return;
         const now = this.audioContext.currentTime;
-        const freq = 880;
+        const freq = 1760;
         const beepDuration = 0.08;
         const beepInterval = 0.12;
         const groupPause = 0.25;
@@ -140,7 +140,7 @@ class AudioController {
             const gainNode = this.audioContext.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, startTime);
-            gainNode.gain.setValueAtTime(0.1, startTime);
+            gainNode.gain.setValueAtTime(0.5, startTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + beepDuration);
             osc.connect(gainNode);
             gainNode.connect(this.audioContext.destination);
@@ -165,7 +165,7 @@ class AudioController {
         if (!this.audioContext) return;
 
         const now = this.audioContext.currentTime;
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const notes = [1046.50, 1318.51, 1567.98, 2093.00]; // C6, E6, G6, C7
 
         notes.forEach((freq, i) => {
             const osc = this.audioContext.createOscillator();
@@ -174,7 +174,7 @@ class AudioController {
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, now + i * 0.15);
 
-            gainNode.gain.setValueAtTime(0.1, now + i * 0.15);
+            gainNode.gain.setValueAtTime(0.5, now + i * 0.15);
             gainNode.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
 
             osc.connect(gainNode);

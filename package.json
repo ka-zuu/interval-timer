@@ -1,6 +1,6 @@
 {
   "name": "interval-timer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "シンプルで使いやすいインターバルタイマーのWebアプリケーションです。 筋トレ、HIIT、勉強（ポモドーロテクニック）など、様々な用途に使用できます。",
   "main": "script.js",
   "scripts": {

@@ -431,6 +431,7 @@ input:focus {
     font-size: 0.8rem;
     cursor: pointer;
     margin-top: auto;
+    transform: translateZ(0);
 }
 
 .app-footer:hover {

@@ -5,12 +5,14 @@ describe('IntervalTimer', () => {
     let timer;
     let onTick;
     let onComplete;
+    let onStepChange;
 
     beforeEach(() => {
         vi.useFakeTimers();
         onTick = vi.fn();
         onComplete = vi.fn();
-        timer = new IntervalTimer(onTick, onComplete);
+        onStepChange = vi.fn();
+        timer = new IntervalTimer(onTick, onComplete, onStepChange);
     });
 
     afterEach(() => {
@@ -50,11 +52,21 @@ describe('IntervalTimer', () => {
         // Advance 10 seconds (work duration)
         vi.advanceTimersByTime(10000);
 
-        // Should be in rest now (or transitioning)
-        // Note: tick logic might need one more frame to switch, let's advance a bit more
+        // Wait for the next frame processing
         vi.advanceTimersByTime(100);
 
         expect(timer.currentIndex).toBeGreaterThan(0);
+    });
+
+    it('should trigger onStepChange when step changes', () => {
+        timer.start(mockPreset);
+
+        // Advance 10 seconds (work duration)
+        vi.advanceTimersByTime(10000);
+        vi.advanceTimersByTime(50); // Small buffer for frame
+
+        // Should have moved to next step and called onStepChange
+        expect(onStepChange).toHaveBeenCalledWith(expect.objectContaining({ type: 'rest' }));
     });
 
     it('should pause and resume', () => {
@@ -81,5 +93,28 @@ describe('IntervalTimer', () => {
 
         expect(onComplete).toHaveBeenCalled();
         expect(timer.timerState).toBe('stopped');
+    });
+
+    it('should return correct state via getState', () => {
+        timer.start(mockPreset);
+
+        const state = timer.getState();
+        expect(state).not.toBeNull();
+        expect(state.stepName).toBe('work');
+        expect(state.timeRemaining).toBe(10);
+        expect(state.repIndex).toBe(1);
+        expect(state.totalReps).toBe(2);
+
+        // Advance 5.1 seconds to be safe with frame boundaries and ensure we crossed the second boundary
+        vi.advanceTimersByTime(5100);
+
+        const nextState = timer.getState();
+        // 10 - 5.1 = 4.9s remaining -> ceil(4.9) = 5
+        expect(nextState.timeRemaining).toBe(5);
+
+        // Total duration of rep 1 is 15s (10 work + 5 rest)
+        // Remaining in rep 1 is 4.9s (current) + 5s (rest) = 9.9s
+        // Progress = 1 - (9.9/15) = 1 - 0.66 = 0.34
+        expect(nextState.progress).toBeCloseTo(1 - (9.9 / 15), 2);
     });
 });

@@ -519,7 +519,7 @@ class UIController {
             card.innerHTML = `
                 <div class="preset-info">
                     <h3>${preset.name}</h3>
-                    <p>${preset.sets.length} steps x ${preset.repetitions} reps • Total: ${formattedTime}</p>
+                    <p>${preset.sets.length} steps x ${preset.repetitions} reps<br>Total: ${formattedTime}</p>
                 </div>
                 <div class="preset-actions">
                     <button class="icon-btn edit-btn" data-id="${preset.id}">✎</button>

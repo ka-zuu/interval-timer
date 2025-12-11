@@ -4,7 +4,7 @@
 
 // --- Constants & Types ---
 const STORAGE_KEY = 'TIMER_PRESETS';
-const APP_VERSION = '1.0.1';
+const APP_VERSION = '1.1.0';
 
 // --- State Management ---
 const state = {
@@ -87,6 +87,67 @@ class StorageManager {
         presets = presets.filter(p => p.id !== id);
         this.savePresets(presets);
         return presets;
+    }
+}
+
+// --- Wake Lock Manager ---
+class WakeLockManager {
+    constructor() {
+        this.wakeLock = null;
+        this.isEnabled = false;
+        this.isAcquiring = false;
+
+        document.addEventListener('visibilitychange', () => {
+            if (this.isEnabled && document.visibilityState === 'visible') {
+                this.activate();
+            }
+        });
+    }
+
+    async enable() {
+        this.isEnabled = true;
+        await this.activate();
+    }
+
+    async disable() {
+        this.isEnabled = false;
+        await this.deactivate();
+    }
+
+    async activate() {
+        if (!('wakeLock' in navigator)) return;
+
+        // If we already have an active lock or are acquiring one, do nothing
+        if (this.wakeLock !== null || this.isAcquiring) {
+            return;
+        }
+
+        this.isAcquiring = true;
+        try {
+            this.wakeLock = await navigator.wakeLock.request('screen');
+            this.wakeLock.addEventListener('release', () => {
+                // If released (by system), clear the reference
+                if (this.wakeLock !== null) {
+                    this.wakeLock = null;
+                }
+            });
+        } catch (err) {
+            console.warn('Wake Lock request failed:', err);
+        } finally {
+            this.isAcquiring = false;
+        }
+    }
+
+    async deactivate() {
+        if (this.wakeLock !== null) {
+            const lock = this.wakeLock;
+            this.wakeLock = null;
+            try {
+                await lock.release();
+            } catch (err) {
+                // Ignore
+            }
+        }
     }
 }
 
@@ -356,6 +417,9 @@ class UIController {
         // Audio
         this.audio = new AudioController();
 
+        // Wake Lock
+        this.wakeLock = new WakeLockManager();
+
         this.timer = new IntervalTimer(
             (state) => this.updateTimerDisplay(state),
             () => this.onTimerComplete(),
@@ -404,6 +468,7 @@ class UIController {
         // Back Button
         document.getElementById('back-btn').addEventListener('click', () => {
             this.timer.reset(); // Reset when leaving
+            this.wakeLock.disable();
             this.updateToggleBtn('start');
             this.switchView('settings-view');
         });
@@ -412,9 +477,11 @@ class UIController {
         this.toggleBtn.addEventListener('click', () => {
             if (this.timer.timerState === 'running') {
                 this.timer.pause();
+                this.wakeLock.disable();
                 this.updateToggleBtn('start');
             } else if (this.timer.timerState === 'paused') {
                 this.timer.resume();
+                this.wakeLock.enable();
                 this.updateToggleBtn('pause');
             } else {
                 // Start fresh
@@ -423,12 +490,14 @@ class UIController {
 
                 const preset = state.presets.find(p => p.id === state.currentPresetId);
                 this.timer.start(preset);
+                this.wakeLock.enable();
                 this.updateToggleBtn('pause');
             }
         });
 
         this.resetBtn.addEventListener('click', () => {
             this.timer.reset();
+            this.wakeLock.disable();
             this.updateToggleBtn('start');
             // Reset display to initial state of current preset
             const preset = state.presets.find(p => p.id === state.currentPresetId);
@@ -657,6 +726,7 @@ class UIController {
 
     onTimerComplete() {
         this.audio.playComplete();
+        this.wakeLock.disable();
         this.updateToggleBtn('start');
         this.stepNameDisplay.textContent = "DONE";
         this.timerDisplay.textContent = "0:00";

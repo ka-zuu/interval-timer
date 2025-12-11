@@ -4,6 +4,7 @@
 
 // --- Constants & Types ---
 const STORAGE_KEY = 'TIMER_PRESETS';
+const APP_VERSION = '1.0.0';
 
 // --- State Management ---
 const state = {
@@ -369,6 +370,7 @@ class UIController {
         state.presets = StorageManager.loadPresets();
         this.renderPresetList();
         this.bindEvents();
+        this.renderVersion();
 
         // Set initial circle
         const radius = this.progressCircle.r.baseVal.value;
@@ -683,6 +685,52 @@ class UIController {
         const target = document.getElementById(viewId);
         target.classList.remove('hidden');
         target.classList.add('active');
+    }
+
+    renderVersion() {
+        const versionDisplay = document.getElementById('version-display');
+        if (versionDisplay) {
+            versionDisplay.textContent = `v${APP_VERSION}`;
+            document.getElementById('app-footer').addEventListener('click', () => {
+                 this.checkForUpdates();
+            });
+        }
+    }
+
+    checkForUpdates() {
+        if (!('serviceWorker' in navigator)) {
+            // alert('Service Worker is not supported.');
+            // In development or non-PWA environments, this might be annoying.
+            console.log('Service Worker is not supported.');
+            return;
+        }
+
+        const versionDisplay = document.getElementById('version-display');
+        const originalText = `v${APP_VERSION}`;
+        versionDisplay.textContent = 'Checking...';
+
+        navigator.serviceWorker.ready.then(registration => {
+            return registration.update().then(() => {
+                 setTimeout(() => {
+                     if (versionDisplay.textContent === 'Checking...') {
+                          if (!registration.installing && !registration.waiting) {
+                              versionDisplay.textContent = 'Latest';
+                              setTimeout(() => {
+                                  versionDisplay.textContent = originalText;
+                              }, 2000);
+                          } else {
+                              versionDisplay.textContent = originalText;
+                          }
+                     }
+                 }, 500);
+            }).catch(err => {
+                console.error('Update check failed:', err);
+                versionDisplay.textContent = 'Error';
+                 setTimeout(() => {
+                      versionDisplay.textContent = originalText;
+                  }, 2000);
+            });
+        });
     }
 }
 

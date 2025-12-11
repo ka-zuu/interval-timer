@@ -421,3 +421,17 @@ input:focus {
     padding: 8px 16px;
     font-size: 0.9rem;
 }
+
+/* App Footer */
+.app-footer {
+    text-align: center;
+    padding: var(--spacing-md);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: auto;
+}
+
+.app-footer:hover {
+    text-decoration: underline;
+}
